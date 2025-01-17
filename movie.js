@@ -7,7 +7,7 @@ let currentSearchQuery = '';
 let loadedMovieIds = new Set();
 
 // List of allowed TMDb IDs
-const allowedTMDbIDs = [12345, 67890, 111213]; // Replace with your selected TMDb IDs
+const allowedTMDbIDs = [289732, 67890, 111213]; // Replace with your selected TMDb IDs
 
 async function fetchPopularMoviesAndSeries(page = 1, query = '') {
   const movieEndpoint = query
