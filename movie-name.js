@@ -6,6 +6,15 @@
             '539972': { name: 'Kraven the Hunter', link: 'https://example.com/link3' },
         };
 
+// Export the `items` object
+export default items;
+
+
+
+
+
+
+
         // Function to display the name and handle the download button click
         function loadContent() {
             const url = new URL(window.location.href);
