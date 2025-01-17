@@ -6,14 +6,14 @@ let currentPage = 1;
 let currentSearchQuery = '';
 let loadedMovieIds = new Set();
 
-async function fetchMoviesAndSeries(page = 1, query = '') {
+async function fetchPopularMoviesAndSeries(page = 1, query = '') {
   const movieEndpoint = query
     ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&page=${page}&language=en-US`
-    : `${BASE_URL}/movie/now_playing?api_key=${API_KEY}&page=${page}&language=en-US&region=IN`;
+    : `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}&language=en-US`;
 
   const seriesEndpoint = query
     ? `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${query}&page=${page}&language=en-US`
-    : `${BASE_URL}/discover/tv?api_key=${API_KEY}&with_origin_country=IN&air_date.gte=2025-01-01&page=${page}&language=en-US`;
+    : `${BASE_URL}/tv/popular?api_key=${API_KEY}&page=${page}&language=en-US`;
 
   const [movieResponse, seriesResponse] = await Promise.all([
     fetch(movieEndpoint),
@@ -57,7 +57,7 @@ function displayMoviesAndSeries(items, clear = false) {
 }
 
 async function loadMoviesAndSeries(query = '', page = 1, clear = false) {
-  const items = await fetchMoviesAndSeries(page, query);
+  const items = await fetchPopularMoviesAndSeries(page, query);
   displayMoviesAndSeries(items, clear);
 }
 
