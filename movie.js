@@ -7,7 +7,7 @@ let currentSearchQuery = '';
 let loadedMovieIds = new Set();
 
 // Define the selected TMDB IDs to filter the posts
-const selectedIds = [12345, 67890, 112233];  // Replace with actual TMDB IDs you want to show
+const selectedIds = [289732, 67890, 112233];  // Replace with actual TMDB IDs you want to show
 
 async function fetchPopularMoviesAndSeries(page = 1, query = '', selectedIds = []) {
   const movieEndpoint = query
