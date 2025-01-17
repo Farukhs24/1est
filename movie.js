@@ -18,22 +18,32 @@ async function fetchPopularMoviesAndSeries(page = 1, query = '', selectedIds = [
     ? `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${query}&page=${page}&language=en-US`
     : `${BASE_URL}/tv/popular?api_key=${API_KEY}&page=${page}&language=en-US`;
 
-  const [movieResponse, seriesResponse] = await Promise.all([
-    fetch(movieEndpoint),
-    fetch(seriesEndpoint),
-  ]);
+  try {
+    const [movieResponse, seriesResponse] = await Promise.all([
+      fetch(movieEndpoint),
+      fetch(seriesEndpoint),
+    ]);
 
-  const moviesData = await movieResponse.json();
-  const seriesData = await seriesResponse.json();
+    const moviesData = await movieResponse.json();
+    const seriesData = await seriesResponse.json();
 
-  // Filter the results based on selectedIds
-  const allItems = [
-    ...(moviesData.results || []).map((item) => ({ ...item, type: 'movie' })),
-    ...(seriesData.results || []).map((item) => ({ ...item, type: 'tv' })),
-  ];
+    console.log('Movies Data:', moviesData);  // Log the movie data
+    console.log('Series Data:', seriesData);  // Log the series data
 
-  // Only return items that are in the selectedIds
-  return allItems.filter(item => selectedIds.includes(item.id));
+    // Combine movie and series results
+    const allItems = [
+      ...(moviesData.results || []).map((item) => ({ ...item, type: 'movie' })),
+      ...(seriesData.results || []).map((item) => ({ ...item, type: 'tv' })),
+    ];
+
+    console.log('All Items:', allItems);  // Log all items before filtering
+
+    // Filter the results based on selectedIds
+    return allItems.filter(item => selectedIds.includes(item.id));
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return [];  // Return an empty array if there's an error
+  }
 }
 
 function displayMoviesAndSeries(items, clear = false) {
@@ -65,6 +75,7 @@ function displayMoviesAndSeries(items, clear = false) {
 
 async function loadMoviesAndSeries(query = '', page = 1, clear = false, selectedIds = []) {
   const items = await fetchPopularMoviesAndSeries(page, query, selectedIds);
+  console.log('Filtered Items:', items);  // Log filtered items before displaying
   displayMoviesAndSeries(items, clear);
 }
 
