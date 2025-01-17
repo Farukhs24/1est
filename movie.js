@@ -1,3 +1,6 @@
+import items from './movie-name.js'; // Adjust the path if needed
+
+
 const API_KEY = 'cb192ff121c372a06121e7173f44916c';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
