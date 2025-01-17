@@ -10,11 +10,7 @@ let currentSearchQuery = '';
 let loadedMovieIds = new Set();
 
 // Predefined items to show on the home page
-const items = {
-  '939243': { name: 'Sonic the Hedgehog 3', link: 'https://example.com/link1' },
-  '762509': { name: 'Mufasa: The Lion King', link: 'https://example.com/link2' },
-  '539972': { name: 'Kraven the Hunter', link: 'https://example.com/link3' },
-};
+
 
 // Fetch movies and series
 async function fetchMoviesAndSeries(page = 1, query = '') {
