@@ -67,7 +67,20 @@ async function loadMoviesAndSeries(query = '', page = 1, clear = false) {
   displayMoviesAndSeries(items, clear);
 }
 
-// Event listeners and initialization remain the same
+async function initializePage() {
+  currentPage = 1; // Reset the page number
+  currentSearchQuery = ''; // Ensure no search query is applied
+  await loadMoviesAndSeries(); // Load popular movies and series by default
+}
+
+function searchMoviesAndSeries() {
+  const searchInput = document.getElementById('search-input');
+  currentSearchQuery = searchInput.value.trim();
+  currentPage = 1; // Reset to the first page
+  loadMoviesAndSeries(currentSearchQuery, currentPage, true);
+}
+
+// Event listeners
 document.getElementById('search-button').addEventListener('click', searchMoviesAndSeries);
 document.getElementById('search-input').addEventListener('keydown', (event) => {
   if (event.key === 'Enter') searchMoviesAndSeries();
@@ -78,4 +91,5 @@ document.getElementById('load-more-button').addEventListener('click', () => {
   loadMoviesAndSeries(currentSearchQuery, currentPage, false);
 });
 
+// Initialize the page
 initializePage();
