@@ -6,6 +6,14 @@ let currentPage = 1;
 let currentSearchQuery = '';
 let loadedMovieIds = new Set();
 
+// Predefined items to show on the home page
+const items = {
+  '939243': { name: 'Sonic the Hedgehog 3', link: 'https://example.com/link1' },
+  '762509': { name: 'Mufasa: The Lion King', link: 'https://example.com/link2' },
+  '539972': { name: 'Kraven the Hunter', link: 'https://example.com/link3' },
+};
+
+// Fetch movies and series
 async function fetchMoviesAndSeries(page = 1, query = '') {
   const movieEndpoint = query
     ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&page=${page}&language=en-US`
@@ -23,17 +31,26 @@ async function fetchMoviesAndSeries(page = 1, query = '') {
   const moviesData = await movieResponse.json();
   const seriesData = await seriesResponse.json();
 
-  return [
+  const combinedResults = [
     ...(moviesData.results || []).map((item) => ({ ...item, type: 'movie' })),
     ...(seriesData.results || []).map((item) => ({ ...item, type: 'tv' })),
   ];
+
+  // Filter results by predefined IDs in `items`
+  return combinedResults.filter((result) => items[result.id]);
 }
 
+// Display movies and series
 function displayMoviesAndSeries(items, clear = false) {
   const moviesContainer = document.getElementById('movies');
   if (clear) {
     moviesContainer.innerHTML = '';
     loadedMovieIds.clear();
+  }
+
+  if (items.length === 0) {
+    moviesContainer.innerHTML = '<p>No matching movies or series found.</p>';
+    return;
   }
 
   items.forEach((item) => {
@@ -56,11 +73,13 @@ function displayMoviesAndSeries(items, clear = false) {
   });
 }
 
+// Load movies and series
 async function loadMoviesAndSeries(query = '', page = 1, clear = false) {
   const items = await fetchMoviesAndSeries(page, query);
   displayMoviesAndSeries(items, clear);
 }
 
+// Search functionality
 async function searchMoviesAndSeries() {
   const searchInput = document.getElementById('search-input');
   currentSearchQuery = searchInput.value.trim();
@@ -71,18 +90,20 @@ async function searchMoviesAndSeries() {
   currentPage = 1;
   await loadMoviesAndSeries(currentSearchQuery, currentPage, true);
 
-  // Push the search query into history to avoid showing search again when going back
+  // Push search query into history
   history.pushState({ query: currentSearchQuery, page: currentPage }, '', `?search=${encodeURIComponent(currentSearchQuery)}`);
 }
 
+// Get parameters from URL
 function getParamsFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   return {
     id: urlParams.get('id'),
-    type: urlParams.get('type')
+    type: urlParams.get('type'),
   };
 }
 
+// Fetch and display details
 async function fetchDetails(type, id) {
   const detailsEndpoint = `${BASE_URL}/${type}/${id}?api_key=${API_KEY}&language=en-US`;
   const videosEndpoint = `${BASE_URL}/${type}/${id}/videos?api_key=${API_KEY}&language=en-US`;
@@ -102,22 +123,25 @@ async function fetchDetails(type, id) {
   }
 }
 
+// Display details
 function displayDetails(type, data, videos) {
   const container = document.getElementById('movie-details');
 
-  const trailer = videos.find(video => video.type === 'Trailer' && video.site === 'YouTube');
+  const trailer = videos.find((video) => video.type === 'Trailer' && video.site === 'YouTube');
   container.innerHTML = `
-    <h1>${data.title || data.name || "No Title Available"}</h1>
+    <h1>${data.title || data.name || 'No Title Available'}</h1>
     <img 
       src="${data.poster_path ? IMAGE_BASE_URL + data.poster_path : ''}" 
       alt="${data.title || data.name}" 
       class="movie-details-image"
     >
-    <p><strong>Overview:</strong> ${data.overview || "No overview available."}</p>
-    <p><strong>Release Date:</strong> ${data.release_date || data.first_air_date || "N/A"}</p>
-    <p><strong>Rating:</strong> ${data.vote_average || "N/A"}/10</p>
-    <p><strong>Genres:</strong> ${data.genres ? data.genres.map(genre => genre.name).join(', ') : "N/A"}</p>
-    <p><strong>Runtime:</strong> ${data.runtime || data.episode_run_time ? `${data.runtime || data.episode_run_time[0]} minutes` : "N/A"}</p>
+    <p><strong>Overview:</strong> ${data.overview || 'No overview available.'}</p>
+    <p><strong>Release Date:</strong> ${data.release_date || data.first_air_date || 'N/A'}</p>
+    <p><strong>Rating:</strong> ${data.vote_average || 'N/A'}/10</p>
+    <p><strong>Genres:</strong> ${data.genres ? data.genres.map((genre) => genre.name).join(', ') : 'N/A'}</p>
+    <p><strong>Runtime:</strong> ${
+      data.runtime || data.episode_run_time ? `${data.runtime || data.episode_run_time[0]} minutes` : 'N/A'
+    }</p>
     <p><strong>Type:</strong> ${type === 'movie' ? 'Movie' : 'TV Series'}</p>
     ${
       trailer
@@ -127,23 +151,7 @@ function displayDetails(type, data, videos) {
   `;
 }
 
-// Handle back/forward navigation with history state
-window.addEventListener('popstate', (event) => {
-  if (event.state && event.state.query) {
-    // If there's a search query in the history, load the previous search results
-    currentSearchQuery = event.state.query;
-    currentPage = event.state.page;
-    document.getElementById('search-input').value = currentSearchQuery;
-    loadMoviesAndSeries(currentSearchQuery, currentPage, true);
-  } else {
-    // If no search query in history, load the default (home) page
-    currentSearchQuery = '';  // Set to empty string to load home
-    currentPage = 1;  // Reset to the first page
-    loadMoviesAndSeries();  // Load default posts
-  }
-});
-
-// Initialize page based on URL parameters (when user refreshes or lands on the page)
+// Initialize page
 function initializePage() {
   const urlParams = new URLSearchParams(window.location.search);
   const searchQuery = urlParams.get('search');
@@ -167,5 +175,19 @@ document.getElementById('load-more-button').addEventListener('click', () => {
   loadMoviesAndSeries(currentSearchQuery, currentPage, false);
 });
 
-// Initialize the page on load
+// Handle history navigation
+window.addEventListener('popstate', (event) => {
+  if (event.state && event.state.query) {
+    currentSearchQuery = event.state.query;
+    currentPage = event.state.page;
+    document.getElementById('search-input').value = currentSearchQuery;
+    loadMoviesAndSeries(currentSearchQuery, currentPage, true);
+  } else {
+    currentSearchQuery = '';
+    currentPage = 1;
+    loadMoviesAndSeries();
+  }
+});
+
+// Initialize on page load
 initializePage();
